@@ -45,7 +45,7 @@ Eep_ESC_Layout:		DB	"#MDRX62H#       "	; ESC layout tag
 CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI#F330#   "	; Project and MCU tag (16 Bytes)
 
-MCU_50MHZ				EQU	0	; Set to 1 if MCU can run at 50MHz
+MCU_48MHZ				EQU	0	; Set to 1 if MCU can run at 48MHz
 ONE_S_CAPABLE			EQU	1	; Set to 1 if ESC can operate at 1S
 PORT3_EXIST			EQU	0	; Set to 1 if MCU has port3
 COMP1_USED			EQU	0	; Set to 1 if MCU has comparator 1 and it is being used
@@ -86,11 +86,11 @@ SIGNATURE_002			EQU	030h
 ;*********************  
 Rcp_In		EQU	7	;i
 Vref			EQU	6	;i
-Mux_A		EQU	5	;i
+Mux_C		EQU	5	;i
 ;			EQU	4	;i
 Mux_B		EQU	3	;i
 Comp_Com		EQU	2	;i
-Mux_C		EQU	1	;i
+Mux_A		EQU	1	;i
 Adc_Ip		EQU	0	;i
 
 P0_DIGITAL	EQU	NOT((1 SHL Mux_A)+(1 SHL Mux_B)+(1 SHL Mux_C)+(1 SHL Comp_Com)+(1 SHL Adc_Ip)+(1 SHL Vref))
@@ -191,15 +191,16 @@ ENDM
 MACRO CpFET_on
 	setb	P1.CpFET
 ENDM
-MACRO All_pFETs_On
-	setb	P1.ApFET
-	setb	P1.BpFET
-	setb	P1.CpFET
-ENDM
 MACRO All_pFETs_Off
 	clr	P1.ApFET
 	clr	P1.BpFET
 	clr	P1.CpFET
+ENDM
+
+MACRO Brake_FETs_On	
+	AnFET_on
+	BnFET_on
+	CnFET_on
 ENDM
 MACRO Damping_FET_On
 	mov	A, DampingFET
@@ -264,9 +265,6 @@ MACRO Set_Adc_Ip_Temp
 ENDM
 MACRO Start_Adc
 	mov	ADC0CN, #90h	; ADC start
-ENDM
-MACRO Get_Adc_Status
-	mov	A, ADC0CN		
 ENDM
 MACRO Read_Adc_Result
 	mov	Temp1, ADC0L

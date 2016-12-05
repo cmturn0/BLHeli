@@ -203,15 +203,16 @@ ENDM
 MACRO CpFET_off
 	clr	P1.CpFET
 ENDM
-MACRO All_pFETs_On
-	setb	P1.ApFET
-	setb	P1.CpFET
-	setb	P1.BpFET
-ENDM
 MACRO All_pFETs_Off
 	clr	P1.ApFET
 	clr	P1.CpFET
 	clr	P1.BpFET
+ENDM
+
+MACRO Brake_FETs_On	
+	ApFET_on
+	BpFET_on
+	CpFET_on
 ENDM
 MACRO Damping_FET_On
 	mov	A, DampingFET
@@ -259,16 +260,11 @@ ENDM
 
 MACRO Initialize_Xbar
 	mov	XBR1, #41h	; Xbar enabled, CEX0 routed to pin Rcp_In			
-	All_nFETs_off		; For unlocking of HIP2103/4 driver circuits
-	call wait100ms
-	All_pFETs_on
-	call wait1ms
-	All_pFETs_off
 ENDM
 
 MACRO Initialize_Adc
 	mov	REF0CN, #0Eh		; Set vdd (3.3V) as reference. Enable temp sensor and bias
-IF MCU_50MHZ == 0
+IF MCU_48MHZ == 0
 	mov	ADC0CF, #58h		; ADC clock 2MHz
 ELSE
 	mov	ADC0CF, #0C0h		; ADC clock 2MHz
@@ -286,9 +282,6 @@ ENDM
 MACRO Start_Adc
 	mov	ADC0CN, #90h		; ADC start
 ENDM
-MACRO Get_Adc_Status
-	mov	A, ADC0CN		
-ENDM
 MACRO Read_Adc_Result
 	mov	Temp1, ADC0L
 	mov	Temp2, ADC0H
@@ -300,8 +293,8 @@ ENDM
 MACRO Clear_RPM_Out
 ENDM
 MACRO Set_MCU_Clk_24MHz
-	mov	FLSCL, #80h		; Set flash timing for 24MHz
 	mov	CLKSEL, #0		; Set clock to 24MHz
+	mov	FLSCL, #80h		; Set flash timing for 24MHz
 	mov	Clock_Set_At_48MHz, #0
 ENDM
 MACRO Set_MCU_Clk_48MHz

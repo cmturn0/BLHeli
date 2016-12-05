@@ -53,8 +53,8 @@ LOCK_BYTE_ADDRESS_16K	EQU	3FFFh	; Address of lock byte if 16k flash size
 LOCK_BYTE_ADDRESS_8K	EQU	1DFFh	; Address of lock byte if 8k flash size
 HIGH_BEC_VOLTAGE		EQU	0	; Set to 1 or more if high BEC voltage is supported
 DAMPED_MODE_ENABLE		EQU	1	; Damped mode enabled
-NFETON_DELAY			EQU	6	; Wait delay from pfets off to nfets on
-PFETON_DELAY			EQU	6	; Wait delay from nfets off to pfets on
+NFETON_DELAY			EQU	9	; Wait delay from pfets off to nfets on
+PFETON_DELAY			EQU	9	; Wait delay from nfets off to pfets on
 ADC_LIMIT_L			EQU 	85	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	0	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
 TEMP_LIMIT			EQU 	109	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
@@ -191,15 +191,16 @@ ENDM
 MACRO CpFET_off
 	clr	P1.CpFET
 ENDM
-MACRO All_pFETs_On
-	setb	P1.ApFET
-	setb	P1.CpFET
-	setb	P1.BpFET
-ENDM
 MACRO All_pFETs_Off
 	clr	P1.ApFET
 	clr	P1.CpFET
 	clr	P1.BpFET
+ENDM
+
+MACRO Brake_FETs_On	
+	AnFET_on
+	BnFET_on
+	CnFET_on
 ENDM
 MACRO Damping_FET_On
 	mov	A, DampingFET
@@ -263,9 +264,6 @@ MACRO Set_Adc_Ip_Temp
 ENDM
 MACRO Start_Adc
 	mov	ADC0CN, #90h		; ADC start
-ENDM
-MACRO Get_Adc_Status
-	mov	A, ADC0CN		
 ENDM
 MACRO Read_Adc_Result
 	mov	Temp1, ADC0L

@@ -50,15 +50,15 @@ ONE_S_CAPABLE			EQU	0	; Set to 1 if ESC can operate at 1S
 PORT3_EXIST			EQU	0	; Set to 1 if MCU has port3
 COMP1_USED			EQU	0	; Set to 1 if MCU has comparator 1 and it is being used
 LOCK_BYTE_ADDRESS_16K	EQU	3FFFh	; Address of lock byte if 16k flash size
-LOCK_BYTE_ADDRESS_8K	EQU	1DFFh	; Address of lock byte if 8k flash size
+LOCK_BYTE_ADDRESS_8K	EQU	1FFFh	; Address of lock byte if 8k flash size
 HIGH_BEC_VOLTAGE		EQU	0	; Set to 1 or more if high BEC voltage is supported
-DAMPED_MODE_ENABLE		EQU	1	; Damped mode disabled
+DAMPED_MODE_ENABLE		EQU	1	; Damped mode enabled
 NFETON_DELAY			EQU	6	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	245	; Wait delay from nfets off to pfets on
 ADC_LIMIT_L			EQU 	85	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	0	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
-TEMP_LIMIT			EQU 	246	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
-TEMP_LIMIT_STEP		EQU	6	; Temperature measurement ADC value increment for which main motor power is further limited
+TEMP_LIMIT			EQU 	103	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
+TEMP_LIMIT_STEP		EQU	4	; Temperature measurement ADC value increment for which main motor power is further limited
 
 ;**** **** **** **** ****
 ; ESC specific defaults
@@ -191,15 +191,16 @@ ENDM
 MACRO CpFET_off
 	setb	P1.CpFET
 ENDM
-MACRO All_pFETs_On
-	clr	P1.ApFET
-	clr	P1.BpFET
-	clr	P1.CpFET
-ENDM
 MACRO All_pFETs_Off
 	setb	P1.ApFET
 	setb	P1.BpFET
 	setb	P1.CpFET
+ENDM
+
+MACRO Brake_FETs_On	
+	AnFET_on
+	BnFET_on
+	CnFET_on
 ENDM
 MACRO Damping_FET_On
 	mov	A, DampingFET
@@ -251,8 +252,8 @@ MACRO Initialize_Xbar
 ENDM
 
 MACRO Initialize_Adc
-	mov	REF0CN, #2Ch	; Set vdd (3.3V) as reference. Enable temp sensor and bias
-	mov	ADC0CF, #58h	; ADC clock 2MHz
+	mov	REF0CN, #0Ch	; Set vdd (3.3V) as reference. Enable temp sensor and bias
+	mov	ADC0CF, #59h	; ADC clock 2MHz, PGA gain 1
 	mov	ADC0MX, #Adc_Ip; Select ADC input
 	mov	ADC0CN0, #80h	; ADC enabled 
 	mov	ADC0CN1, #01h	; Common mode buffer enabled
@@ -265,9 +266,6 @@ MACRO Set_Adc_Ip_Temp
 ENDM
 MACRO Start_Adc
 	mov	ADC0CN0, #90h	; ADC start
-ENDM
-MACRO Get_Adc_Status
-	mov	A, ADC0CN0		
 ENDM
 MACRO Read_Adc_Result
 	mov	Temp1, ADC0L

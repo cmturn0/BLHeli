@@ -191,15 +191,16 @@ ENDM
 MACRO CpFET_off
 	clr	P1.CpFET
 ENDM
-MACRO All_pFETs_On
-	setb	P1.ApFET
-	setb	P1.BpFET
-	setb	P1.CpFET
-ENDM
 MACRO All_pFETs_Off
 	clr	P1.ApFET
 	clr	P1.BpFET
 	clr	P1.CpFET
+ENDM
+
+MACRO Brake_FETs_On	
+	AnFET_on
+	BnFET_on
+	CnFET_on
 ENDM
 MACRO Damping_FET_On
 	mov	A, DampingFET
@@ -264,9 +265,6 @@ MACRO Set_Adc_Ip_Temp
 ENDM
 MACRO Start_Adc
 	mov	ADC0CN, #90h	; ADC start
-ENDM
-MACRO Get_Adc_Status
-	mov	A, ADC0CN		
 ENDM
 MACRO Read_Adc_Result
 	mov	Temp1, ADC0L
